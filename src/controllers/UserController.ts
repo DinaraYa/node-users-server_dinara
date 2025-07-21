@@ -13,7 +13,7 @@ export class UserController {
             myLogger.save(`User with id$ {body.id} was successfully added.`)
             res.writeHead(201, {'Content-Type': 'text/html'});
             res.end('User was added');
-            myLogger.log(`Response for add user with id ${body.id} was sent`);
+            myLogger.log(`Response for add user with id ${body.id} was sent `);
         } else {
             res.writeHead(409, {'Content-Type': 'text/html'})
             res.end('User already exists');
