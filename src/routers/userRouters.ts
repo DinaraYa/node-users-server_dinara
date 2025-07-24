@@ -1,5 +1,6 @@
 import {IncomingMessage, ServerResponse} from "node:http";
 import {UserController} from "../controllers/UserController.ts";
+import {myLogger} from "../events/logger.ts";
 
 export const userRouters = async (req: IncomingMessage, res: ServerResponse, controller: UserController) => {
     const { url, method } = req;
@@ -22,6 +23,12 @@ export const userRouters = async (req: IncomingMessage, res: ServerResponse, con
         }
         case "/api/user" + "GET": {
             await controller.getUser(req, res)
+            break;
+        }
+        case "/api/logger" + "GET": {
+            const result = myLogger.getLogArray();
+            res.writeHead(200, {"Content-Type": "application/json"});
+            res.end(JSON.stringify(result));
             break;
         }
         default: {

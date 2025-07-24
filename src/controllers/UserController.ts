@@ -10,7 +10,7 @@ export class UserController {
         const body = await parseBody(req) as User;
         const isSuccess = this.userService.addUser(body as User);
         if (isSuccess) {
-            myLogger.save(`User with id$ {body.id} was successfully added.`)
+            myLogger.save(`User with id ${body.id} was successfully added.`)
             res.writeHead(201, {'Content-Type': 'text/html'});
             res.end('User was added');
             myLogger.log(`Response for add user with id ${body.id} was sent `);
