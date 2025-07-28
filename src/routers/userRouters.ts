@@ -1,10 +1,14 @@
 import {IncomingMessage, ServerResponse} from "node:http";
 import {UserController} from "../controllers/UserController.ts";
 import {myLogger} from "../events/logger.ts";
+import {baseUrl} from "../config/userServerConfig.ts";
 
-export const userRouters = async (req: IncomingMessage, res: ServerResponse, controller: UserController) => {
+export const userRouters =
+    async (req: IncomingMessage, res: ServerResponse, controller: UserController) => {
     const { url, method } = req;
-    switch (url! + method) {
+    const parsedUrl = new URL( url!, baseUrl);
+
+    switch (parsedUrl.pathname! + method) {
         case "/api/users" + "POST": {
             await controller.addUser(req, res)
             break;
