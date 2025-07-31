@@ -91,40 +91,21 @@ export class PostController {
         return __awaiter(this, void 0, void 0, function* () {
             const body = req.body;
             const id = req.query.id;
-            try {
-                this.postService.updatePost(id, body);
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.end('User was successfully updated');
-                myLogger.log(`User with id ${body.id} was updated`);
-            }
-            catch (e) {
-                if (e === "404") {
-                    res.writeHead(404, { 'Content-Type': 'text/html' });
-                    res.end(`User not found`);
-                    myLogger.log(`User to update not found`);
+            const update = this.postService.updatePost(id, body);
+            if (update)
+                try {
+                    res.writeHead(200, { 'Content-Type': 'text/html' });
+                    res.end('Post was successfully updated');
+                    myLogger.log(`Post with id ${body.id} was updated`);
                 }
-                else {
+                catch (e) {
                     res.writeHead(500, { 'Content-Type': 'text/html' });
                     res.end('Unexpected server error');
                     myLogger.log(`Server error`);
                     myLogger.save(`Server error` + JSON.stringify(e));
                 }
-            }
         });
     }
-    // const update = this.postService.updatePost(id as string, body);
-    //     if (update)
-    //     try {
-    //         res.writeHead(200, {'Content-Type': 'text/html'})
-    //         res.end('Post was successfully updated');
-    //         myLogger.log(`Post with id ${body.id} was updated`);
-    //     } catch(e) {
-    //         res.writeHead(500, {'Content-Type': 'text/html'})
-    //         res.end('Unexpected server error');
-    //         myLogger.log(`Server error`);
-    //         myLogger.save(`Server error` + JSON.stringify(e));
-    //     }
-    // }
     removePost(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
             const id = req.query.id;
