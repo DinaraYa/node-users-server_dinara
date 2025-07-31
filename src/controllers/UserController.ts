@@ -1,15 +1,15 @@
 import {UserService} from "../service/UserService.ts";
-import {parseBody} from "../utils/tools.ts";
 import {User} from "../model/userTypes.ts";
-import {IncomingMessage, ServerResponse} from "node:http";
 import {myLogger} from "../events/logger.ts";
 import {baseUrl} from "../config/userServerConfig.ts";
+import express from "express";
 
 export class UserController {
     constructor(private userService: UserService) { }
 
-    async addUser(req: IncomingMessage, res: ServerResponse ) {
-        const body = await parseBody(req) as User;
+    async addUser(req: express.Request, res: express.Response ) {
+        //const body = await parseBody(req) as User;
+        const body = req.body;
         const isSuccess = this.userService.addUser(body as User);
         if (isSuccess) {
             myLogger.save(`User with id ${body.id} was successfully added.`)
@@ -23,7 +23,7 @@ export class UserController {
             myLogger.log(`User with id ${body.id} already exists`);
         }
     }
-    async getAllUsers(req: IncomingMessage, res: ServerResponse) {
+    async getAllUsers(req: express.Request, res: express.Response) {
         const users = this.userService.getAllUsers();
         myLogger.save(`All users were successfully retrieved`);
         res.writeHead(200, {'Content-Type': 'application/json'})
@@ -31,10 +31,15 @@ export class UserController {
         myLogger.log(`Response for getting all users was sent`);
     }
 
-    async updateUser(req: IncomingMessage, res: ServerResponse) {
-        const body = await parseBody(req) as User;
+    async updateUser(req: express.Request, res: express.Response) {
+        const body = req.body;
+        const parsedUrl = new URL(req.url!, baseUrl);
+        const id = parsedUrl.searchParams.get('id');
+
+        const idUser = Number(id);
+
         try {
-            this.userService.updateUser(body);
+            this.userService.updateUser(idUser, body);
             res.writeHead(200, {'Content-Type': 'text/html'})
             res.end('User was successfully updated');
             myLogger.log(`User with id ${body.id} was updated`);
@@ -52,7 +57,7 @@ export class UserController {
         }
     }
 
-    async removeUser(req: IncomingMessage, res: ServerResponse) {
+    async removeUser(req: express.Request, res: express.Response) {
 
         const parsedUrl = new URL(req.url!, baseUrl);
         const id = parsedUrl.searchParams.get('id');
@@ -70,9 +75,11 @@ export class UserController {
             myLogger.log(`User with id ${id} was not found`);
         }
     }
-    async getUser(req: IncomingMessage, res: ServerResponse) {
+    async getUser(req: express.Request, res: express.Response) {
+
         const parsedUrl = new URL(req.url!, baseUrl);
         const id = parsedUrl.searchParams.get('id');
+
         if (id !== null) {
             const user = this.userService.getUser(Number(id));
             if (user) {

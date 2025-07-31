@@ -1,0 +1,1 @@
+[{"date":"2025-07-31T16:13:04.185Z","message":"Data was saved to file"},{"date":"2025-07-31T16:13:04.185Z","message":"Server shutdown by Ctrl+C"}]

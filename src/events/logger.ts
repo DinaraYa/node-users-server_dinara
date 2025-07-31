@@ -34,7 +34,7 @@ myLogger.on('save', (message:string) => {
 
 myLogger.on('to_file', (message:string) => {
     myLogger.addLogToArray(message);
-    const fileName = 'log.txt';
+    const fileName = `src/log/log${new Date().toISOString().replace(/:/g, '_')} + .txt`;
     fs.writeFileSync(fileName, JSON.stringify(myLogger.getLogArray()))
 })
 

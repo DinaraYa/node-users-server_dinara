@@ -4,11 +4,15 @@ import {UserFilePersistenceService} from "./UserFilePersistenceService.ts";
 import fs from "fs";
 import {myLogger} from "../events/logger.ts";
 
-export class UserServiceEmbeddedImpl implements UserService, UserFilePersistenceService {
+
+
+export const users: User[] = []
+
+export class UserServiceEmbeddedImpl implements UserService, UserFilePersistenceService{
     private users: User[] = [];
+
     private rs = fs.createReadStream('src/data.txt', {encoding: 'utf8', highWaterMark: 24});
 
-    // private ws = fs.createWriteStream('data_new1.txt');
     addUser(user: User): boolean {
         if (this.users.findIndex((u: User) => u.id === user.id) === -1) {
             this.users.push(user);
@@ -21,8 +25,8 @@ export class UserServiceEmbeddedImpl implements UserService, UserFilePersistence
         return [...this.users]
     }
 
-    updateUser(newUserData: User): boolean {
-        const index = this.users.findIndex((u: User) => u.id === newUserData.id);
+    updateUser(id: number, newUserData: User): boolean {
+        const index = this.users.findIndex((u: User) => u.id === id);
         if (index === -1) {
             return false;
         }
@@ -71,32 +75,35 @@ export class UserServiceEmbeddedImpl implements UserService, UserFilePersistence
 
     saveDataToFile(): Promise<string> {
         return new Promise((resolve, reject) => {
-            const ws = fs.createWriteStream('data_new.txt')
-            myLogger.log("Ws created")
-            const data = JSON.stringify(this.users);
-            myLogger.log(data);
+            try{
+                const ws = fs.createWriteStream('data_new.txt')
+                myLogger.log("Ws created")
+                const data = JSON.stringify(this.users);
+                myLogger.log(data);
+                ws.write((data), (e) => {
+                    if (e) {
+                        myLogger.log("Error!" + e?.message);
+                        reject(e);
+                    } else {
+                        ws.end();
+                    }
+                });
+                ws.on('finish', () => {
+                    myLogger.log("Data was saved to file");
+                    myLogger.save("Data was saved to file");
+                    resolve("Ok");
 
-            // fs.writeFileSync('data_new.txt', data);
-
-            ws.write((data), (e) => {
-                if (e) {
-                    myLogger.log("Error!" + e?.message);
-                    reject(e);
-                } else {
-                    ws.end();
-                }
-            });
-            ws.on('finish', () => {
-                myLogger.log("Data was saved to file");
-                myLogger.save("Data was saved to file");
-                resolve("Ok");
-
-            })
-            ws.on('error', () => {
-                myLogger.log("error: data not saved!")
-                reject("Error: data not saved!");
-            })
-            return "Ok";
+                })
+                ws.on('error', () => {
+                    myLogger.log("error: data not saved!")
+                    reject("Error: data not saved!");
+                })
+                return "Ok";
+            } catch (error) {
+                console.log("Error: ", error);
+                myLogger.log("Error saveDataToFile ")
+            }
+            return "ok"
         })
     }
 }
