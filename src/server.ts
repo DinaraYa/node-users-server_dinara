@@ -14,9 +14,13 @@ export const userController = new UserController(service);
 export const launchServer = () => {
     service.restoreDataFromFile()
     const app = express();
-    app.use(express.json());
-    app.use('/api', apiRouter);   // когда прилетают запросы в виде /api - используй apiRouter
     app.listen(PORT, () => console.log(`Server runs at http://localhost:${PORT}`));
+
+
+    // ========== Middleware ==============
+    app.use(express.json()); // превращает readable stream в объект и прочитывает все
+    //============ Router ===============
+    app.use('/api', apiRouter);   // когда прилетают запросы в виде /api - используй apiRouter
     process.on('SIGINT', async () => {
         await service.saveDataToFile();
         myLogger.log("Saving....")

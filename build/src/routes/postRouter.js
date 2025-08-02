@@ -10,9 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import express from "express";
 import { PostController } from "../controllers/PostController.js";
 import { PostServiceEmbeddedImpl } from "../service/PostServiceEmbeddedImpl.js";
+import { myLogger } from "../events/logger.js";
 const postService = new PostServiceEmbeddedImpl();
 const postController = new PostController(postService);
 export const postRouter = express.Router();
+postRouter.use((req, res, next) => {
+    myLogger.log(`Request "api/posts${req.url}" was received`);
+    next();
+});
+postRouter.use((req, res, next) => {
+    myLogger.save(`Request "api/posts${req.url}" was received`);
+    next();
+});
 postRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (req.query.id) {
         yield postController.getPostById(req, res);
