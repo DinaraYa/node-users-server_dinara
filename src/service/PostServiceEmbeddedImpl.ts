@@ -31,6 +31,7 @@ export class PostServiceEmbeddedImpl implements PostService {
 
     updatePost(id:string, newPostData:Post): boolean {
         const index = this.posts.findIndex((p: Post) => p.id === id);
+        console.log(index)
         if (index === -1) {
             return false;
         }
@@ -40,6 +41,7 @@ export class PostServiceEmbeddedImpl implements PostService {
     }
     removePost(postId: string): Post | null{
         const index = this.posts.findIndex((p: Post) => p.id === postId);
+        console.log(index);
         if (index === -1) {
             return null;
         }
