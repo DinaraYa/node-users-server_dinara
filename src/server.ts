@@ -31,13 +31,13 @@ export const launchServer = () => {
     });
 
     app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-       //  const error: {status: number, message: string} = JSON.parse(err.message);
+       // const error: {status: number, message: string} = JSON.parse(err.message);
+
         if (err instanceof HttpError)
         res.status(err.status).send(err.message);
-        else
-            res.status(500).send("Unknown server error");
+       else
+           res.status(500).send("Unknown server error");
     })
-
 
     process.on('SIGINT', async () => {
         await service.saveDataToFile();

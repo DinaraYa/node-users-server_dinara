@@ -10,8 +10,7 @@ export class PostServiceEmbeddedImpl implements PostService {
 
     addPost(post: Post): boolean {
         const index = this.posts.findIndex((p: Post) => p.id === post.id);
-        if (index !== -1)
-            return false;
+        if (index !== -1) throw new HttpError( 404,  "Post not found");
         this.posts.push(post);
         return true;
     }
@@ -21,17 +20,15 @@ export class PostServiceEmbeddedImpl implements PostService {
     }
 
     getPostById(postId: number): Post {
-        const index: number = this.posts.findIndex((p: Post) => Number(p.id) === Number(postId));
-        if (index === -1) {
-            console.log((this.posts)[index].id)
-            throw new HttpError(404, "Post not found")
-        }
-        return this.posts[index];
+         const index: number = this.posts.findIndex((p: Post) => Number(p.id) === Number(postId));
+       // if (index === -1) throw new Error(JSON.stringify({status: 404, message: "Post not found"}))
+        if (index === -1) throw new HttpError( 404,  "Post not found");
+
+        return this.posts[index]
     }
 
     getPosts(id: number): Post {
         const index = users.findIndex((u: User) => Number(u.id) === id);
-        console.log("Function " + id, typeof id);
         if (index === -1)
             throw new HttpError(404, "Post not found")
         return this.posts[index];
@@ -43,21 +40,15 @@ export class PostServiceEmbeddedImpl implements PostService {
 
     updatePost(newPostData: Post): boolean {
         const index = this.posts.findIndex((p: Post) => Number(p.id) === Number(newPostData.id));
-        console.log("Index" + index)
-        if (index === -1) {
-            return false;
-        }
+        if (index === -1) throw new HttpError( 404,  "Post not found");
         this.posts[index] = newPostData;
         console.log([...this.posts]);
         return true;
-
     }
 
     removePost(postId: number): Post {
         const index: number = this.posts.findIndex((p: Post) => Number(p.id) === Number(postId));
-        console.log("Index" + index)
-        console.log("Список постов:", this.posts);
-        if (index === -1) throw new Error("Post not found")
-        return this.posts.splice(index, 1) [0]
+        if (index === -1) throw new HttpError(404, "Post not found");
+        return this.posts.splice(index, 1) [0];
     }
 }

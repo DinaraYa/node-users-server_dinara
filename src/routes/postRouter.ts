@@ -4,69 +4,63 @@ import * as controller from '../controllers/PostController.ts'
 import asyncHandler from "express-async-handler";
 import {convertPostDto} from "../utils/tools.js";
 import {Post} from "../model/postTypes.js";
+import {PostDtoSchema} from "../joiSchemas/postSchemas.js";
+import {HttpError} from "../errorHandler/HttpError.js";
 
 
 export const postRouter = express.Router();
 
-// postRouter.use((req: Request, res: Response, next: NextFunction) => {
-//     myLogger.log(`Request "api/posts${req.url}" was received`);
-//     next();
-// })
-// postRouter.use((req: Request, res: Response, next: NextFunction) => {
-//     myLogger.save(`Request "api/posts${req.url}" was received`);
-//     next();
-// })
+postRouter.use((req: Request, res: Response, next: NextFunction) => {
+    myLogger.log(`Request "api/posts${req.url}" was received`);
+    next();
+})
+postRouter.use((req: Request, res: Response, next: NextFunction) => {
+    myLogger.save(`Request "api/posts${req.url}" was received`);
+    next();
+})
 
-postRouter.get('/', async (req, res) => {
-    if (req.query.userName) {
-        controller.getPostByUserName(req, res)
-        return
-    } else {
+
+
+
+postRouter.get('/', asyncHandler(async (req:Request, res:Response) => {
         controller.getAllPosts(req, res);
-        return
-    }
-})
+}))
 
-
-postRouter.get('/post/:id', async (req:Request, res:Response) => {
-    try {
+postRouter.get('/post/:id', asyncHandler(async (req:Request, res:Response) => {
+        const {id} = req.params;
+        if (!id) throw new HttpError(404,"Post not found");
         controller.getPostById(req, res)
-    } catch (error) {
-       res.status(400).send("Bad request");
+}))
 
-    }
-})
-
-postRouter.post('/', async (req, res) => {
+postRouter.post('/', asyncHandler(async (req:Request, res:Response):Promise<void>=> {
+    const postDto: Post = req.body;
+    const {error} = PostDtoSchema.validate(postDto);
+    if (error) throw new HttpError(400, error.message)
+    const post: Post| null = convertPostDto(postDto);
+    if(!post) throw new Error ("Bad request");
+    req.body = post as Post;
     controller.addPost(req, res);
-})
+}))
 
-postRouter.put('/', async (req: Request, res: Response) => {
-    const postDo = req.body
-    console.log(postDo)
-    console.log(typeof postDo.id)
-    const post: Post|null = convertPostDto(postDo);
-    if(!post){
-        return  res.status(400).send("Bad request");
-    }
+postRouter.put('/', asyncHandler(async (req: Request, res: Response):Promise<void> => {
+    const postDto: Post = req.body;
+    const {error} = PostDtoSchema.validate(postDto);
+    if (error) throw new HttpError(400, error.message)
+    const post: Post|null = convertPostDto(postDto);
+    if(!post) throw new Error ("Bad request");
     req.body = post as Post;
     controller.updatePost(req, res);
-})
+}))
 
-postRouter.delete('/post/:id', async (req, res) => {
+postRouter.delete('/post/:id', asyncHandler(async (req:Request, res:Response):Promise<void> => {
     const id = +req.params.id;
-    console.log(id, typeof id)
-    if (!id) {
-       return  res.status(404).send("Bad request");
-    }
+    if (!id) throw new HttpError(404,"Post not found");
     controller.removePost(req, res);
-})
+}))
 
-postRouter.get('/user', (req:Request, res:Response) => {
+postRouter.get('/user', asyncHandler(async (req:Request, res:Response) => {
     const {userName} = req.query
-    console.log(userName, typeof userName)
-    if(!userName || typeof userName !== "string")
-       return  res.status(400).send(`Bad request: userName required`)
+    if(!userName || typeof userName !== "string") throw new HttpError(400, "Bad request: userName required")
     controller.getPostByUserName(req, res);
-})
+}))
 
