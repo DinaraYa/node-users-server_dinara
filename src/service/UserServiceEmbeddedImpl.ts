@@ -43,7 +43,7 @@ export class UserServiceEmbeddedImpl implements UserService, UserFilePersistence
     }
 
     getUser(userId: number): User | undefined {
-        return this.users.find((u: User) => u.id === userId);
+        return this.users.find((u: User) => Number(u.id) === Number(userId));
     }
 
     restoreDataFromFile(): string {

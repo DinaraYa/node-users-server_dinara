@@ -2,53 +2,62 @@ import {PostService} from "./PostService.ts";
 import {Post} from "../model/postTypes.ts";
 import {User} from "../model/userTypes.ts";
 import {users} from "./UserServiceEmbeddedImpl.ts"
+import {HttpError} from "../errorHandler/HttpError.js";
 
 
 export class PostServiceEmbeddedImpl implements PostService {
-    private posts: Post [] =[];
+    private posts: Post [] = [];
 
     addPost(post: Post): boolean {
-        if (this.posts.findIndex((p: Post) => p.id === post.id) === -1) {
-            this.posts.push(post);
-            return true;
-        }
-        return false;
+        const index = this.posts.findIndex((p: Post) => p.id === post.id);
+        if (index !== -1)
+            return false;
+        this.posts.push(post);
+        return true;
     }
 
     getAllPosts(): Post [] {
         return [...this.posts];
     }
 
-    getPostById (postId: string): Post | undefined {
-        return this.posts.find((p: Post) => p.id === postId);
+    getPostById(postId: number): Post {
+        const index: number = this.posts.findIndex((p: Post) => Number(p.id) === Number(postId));
+        if (index === -1) {
+            console.log((this.posts)[index].id)
+            throw new HttpError(404, "Post not found")
+        }
+        return this.posts[index];
     }
 
-    getPostByUserName (userName: string): Post[] {
-            const foundUser = users.find((u: User) => u.userName === userName);
-            if (!foundUser) return [];
-            return this.posts.filter((p: Post) => p.userId === foundUser.id.toString());
+    getPosts(id: number): Post {
+        const index = users.findIndex((u: User) => Number(u.id) === id);
+        console.log("Function " + id, typeof id);
+        if (index === -1)
+            throw new HttpError(404, "Post not found")
+        return this.posts[index];
     }
 
-    updatePost(id:string, newPostData:Post): boolean {
-        const index = this.posts.findIndex((p: Post) => p.id === id);
-        console.log(index)
+    getAllUserPosts(userId: number): Post[] {
+        return this.posts.filter(item => Number(item.userId) === Number(userId));
+    }
+
+    updatePost(newPostData: Post): boolean {
+        const index = this.posts.findIndex((p: Post) => Number(p.id) === Number(newPostData.id));
+        console.log("Index" + index)
         if (index === -1) {
             return false;
         }
         this.posts[index] = newPostData;
+        console.log([...this.posts]);
         return true;
 
     }
-    removePost(postId: string): Post | null{
-        const index = this.posts.findIndex((p: Post) => p.id === postId);
-        console.log(index);
-        if (index === -1) {
-            return null;
-        }
-        const [removed] = this.posts.splice(index, 1);
-        return removed;
+
+    removePost(postId: number): Post {
+        const index: number = this.posts.findIndex((p: Post) => Number(p.id) === Number(postId));
+        console.log("Index" + index)
+        console.log("Список постов:", this.posts);
+        if (index === -1) throw new Error("Post not found")
+        return this.posts.splice(index, 1) [0]
     }
-
-
-
 }
